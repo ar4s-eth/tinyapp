@@ -10,6 +10,9 @@ const urlDatabase = {
 //setting ejs to be the view engine
 app.set("view engine", "ejs");
 
+
+//Route handlers
+
 //register a handler on the root path
 app.get("/", (req, res) => {
   res.send("Hello");
@@ -23,6 +26,13 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 })
+
+//set route hanlder for path "/urls" 
+//and use res.render() to pass the URL data to the template
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
