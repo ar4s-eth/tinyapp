@@ -7,6 +7,9 @@ const urlDatabase = {
   "9sm5xk": "http://www.google.com"
 };
 
+//setting ejs to be the view engine
+app.set("view engine", "ejs");
+
 //register a handler on the root path
 app.get("/", (req, res) => {
   res.send("Hello");
@@ -16,7 +19,7 @@ app.get("/", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 })
-
+//
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 })
