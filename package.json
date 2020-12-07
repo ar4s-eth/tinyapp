@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/ar4sdoteth/tinyapp/issues"
   },
-  "homepage": "https://github.com/ar4sdoteth/tinyapp#readme"
+  "homepage": "https://github.com/ar4sdoteth/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
