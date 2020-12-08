@@ -34,8 +34,7 @@ let urlDatabase = {
 // Function returns a random string of 6 characters a-Z, 0-9 
 
 function generateRandomString() {
-  random = crypto.randomBytes(3).toString('hex');
-  return random.toString(random);
+  return crypto.randomBytes(3).toString('hex');
 };
 
 // Route Handlers
@@ -73,8 +72,9 @@ app.get("/urls/new", (req, res) => {
 // longURL key gets assigned the value of shortURL in the urlDatabase object.
 
 // patter matching routes /urls/ shortURL(key): /what the user types into the browser(value)
-//req.params.shortURL holds the property
+// req.params.shortURL holds the property
 app.get("/urls/:shortURL", (req, res) => {
+  // packaging up an object to send to the url_show template to reference
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("url_show", templateVars); //(which template we're sending data to, what data we are sending)
 });
@@ -89,12 +89,25 @@ app.post("/urls", (req, res) => {
   // key will match with form input names(name=)
   // res.send("Ok");
   // Update urlDatabase with key value pairs, when it receives a POST request to /urls
+  // console.log(`inside post`, req.body.longURL)
   urlDatabase[shortURL] = req.body.longURL
+  if (req.body.longURL.length = 0) {
+    res.send("Error: Must enter a URL");
+  }
   // console.log(`calling shortURL`, shortURL)
   // console.log(`from inside app.post`, urlDatabase)
   // All of the work has been done to hand off, redirect the user to the path/shortURL
   // to display the data.
   res.redirect(`urls/${shortURL}`);
+});
+// redirect any request to /u/:shortURL to its longURL
+// the path after app.get /: will create a new key in req.params
+app.get("/u/:shortURL", (req, res) => {
+  console.log(req.params)
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[shortURL]
+  // console.log(`inside app.getshortURL`, urlDatabase)
+  res.redirect(longURL);
 });
 
 
