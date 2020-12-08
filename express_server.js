@@ -33,15 +33,19 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
+//add new get route to show the form in urls_new
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+})
 
 //new route to render url_show template with the :shortURL id. 
 //re-assign the properties of templateVars using the route handler :shortURL,
 //shortURL key gets assigned the route paths value that's being pulled from req.params
 //longURL key get's assigned the value of shortURL in the urlDatabase object.
-  app.get("/urls/:shortURL", (req, res) => {
-    const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-    res.render("url_show", templateVars);
-  });
+app.get("/urls/:shortURL", (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  res.render("url_show", templateVars);
+});
 
 
 app.listen(PORT, () => {
