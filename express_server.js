@@ -101,10 +101,10 @@ app.post("/urls", (req, res) => {
   res.redirect(`urls/${shortURL}`);
 });
 // redirect any request to /u/:shortURL to its longURL
-// the path after app.get /: will create a new key in req.params
+// the path after app.get /: will create a new key in req.params (based on what comes after /u/)
 app.get("/u/:shortURL", (req, res) => {
   console.log(req.params)
-  const shortURL = req.params.shortURL
+  const shortURL = req.params.shortURL // keys will be made e.g "a3DSlj", 
   const longURL = urlDatabase[shortURL]
   // console.log(`inside app.getshortURL`, urlDatabase)
   res.redirect(longURL);
