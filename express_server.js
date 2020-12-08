@@ -1,6 +1,14 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
+//random string generation
+const crypto = require('crypto');
+
+
+//added before routes to convert the request body from a buffer into a string.
+//adds the data tot he request object under the key body:
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -10,6 +18,11 @@ const urlDatabase = {
 //setting ejs to be the view engine
 app.set("view engine", "ejs");
 
+
+//function to implement a random string of 6 charaters using the crypto module
+function generateRandomString() {
+  return crypto.randomBytes(3).toString('hex');
+}
 
 //Route handlers
 
@@ -47,7 +60,16 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("url_show", templateVars);
 });
 
+//dummy response that matches the post request path to handle the request.
+//console.log prints to the server console the body of the request.
+//res.send will send a message to the client
+app.post("/urls", (req, res) => {
+  console.log(req.body);  
+  res.send("Ok");       
+});
 
+
+//
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp server listening on port ${PORT}!`);
 });
