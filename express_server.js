@@ -36,7 +36,7 @@ app.get("/urls", (req, res) => {
 
 //new route to render url_show template with the :shortURL id. 
 //re-assign the properties of templateVars using the route handler :shortURL,
-//shortURL key gets assigned the route path as it's key, and it's value
+//shortURL key gets assigned the route paths value that's being pulled from req.params
 //longURL key get's assigned the value of shortURL in the urlDatabase object.
   app.get("/urls/:shortURL", (req, res) => {
     const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
