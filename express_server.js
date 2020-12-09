@@ -63,6 +63,7 @@ app.get("/urls", (req, res) => {
 
 // Add new get route to show the form for URL entry in urls_new
 app.get("/urls/new", (req, res) => {
+  // console.log(`app.get/urls/new`, req.params)
   res.render("urls_new");
 });
 
@@ -74,40 +75,61 @@ app.get("/urls/new", (req, res) => {
 // patter matching routes /urls/ shortURL(key): /what the user types into the browser(value)
 // req.params.shortURL holds the property
 app.get("/urls/:shortURL", (req, res) => {
+  // console.log(`app.get/urls/:shortURL`, req.params)
   // packaging up an object to send to the url_show template to reference
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  // console.log(`before rendering url_show`, templateVars)
   res.render("url_show", templateVars); //(which template we're sending data to, what data we are sending)
+});
+
+// redirect any request to /u/:shortURL to its longURL
+// the path after app.get /: will create a new key in req.params (based on what comes after /u/)
+app.get("/u/:shortURL", (req, res) => {
+  // console.log(`app.get/u/:shortURL`, req.params)
+  // console.log(req.params)
+  const shortURL = req.params.shortURL // keys will be made e.g "a3DSlj", 
+  const longURL = urlDatabase[shortURL]
+  // console.log(`inside app.getshortURL`, urlDatabase)
+  res.redirect(longURL);
 });
 
 // Post response path to handle the request.
 // console.log prints to the server console the body of the request.
 // res.send will send a message to the client
 app.post("/urls", (req, res) => {
+  // console.log(`app.post/urls`, req.params)
   shortURL = generateRandomString()
-  // console.log(`reqbody`, req.body) <return value from template
+
   // req.params comes from the first argument after post/route
   // key will match with form input names(name=)
   // res.send("Ok");
   // Update urlDatabase with key value pairs, when it receives a POST request to /urls
   // console.log(`inside post`, req.body.longURL)
   urlDatabase[shortURL] = req.body.longURL
-  if (req.body.longURL.length = 0) {
-    res.send("Error: Must enter a URL");
-  }
-  // console.log(`calling shortURL`, shortURL)
-  // console.log(`from inside app.post`, urlDatabase)
+
   // All of the work has been done to hand off, redirect the user to the path/shortURL
   // to display the data.
   res.redirect(`urls/${shortURL}`);
 });
-// redirect any request to /u/:shortURL to its longURL
-// the path after app.get /: will create a new key in req.params (based on what comes after /u/)
-app.get("/u/:shortURL", (req, res) => {
-  console.log(req.params)
-  const shortURL = req.params.shortURL // keys will be made e.g "a3DSlj", 
-  const longURL = urlDatabase[shortURL]
-  // console.log(`inside app.getshortURL`, urlDatabase)
-  res.redirect(longURL);
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  // console.log(`app.post/urls/shortURL/delete params`, req.params)
+  // console.log(`app.post/urls/shortURL/delete body`, req.body)
+  // console.log(`app.post/urls/shortURL/delete urlDatabase`, urlDatabase)
+
+  let shortURL = req.params.shortURL
+  console.log(`shortURL variable`, shortURL)
+  let longURL = req.body.longURL
+  //req.body.longURL needs to become the value of shortURL and replaced in the database
+
+  delete urlDatabase[shortURL]
+  //edits the value of the short URL key's value to that of the longURL
+  urlDatabase[shortURL] = longURL
+  console.log(`final urlDatabase after edit`, urlDatabase)
+  
+  // console.log(`after reassigning shortURL`,shortURL);
+  // console.log(`compared to urlDatabase`, urlDatabase)
+  res.redirect('/urls')
 });
 
 
