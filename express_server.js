@@ -109,12 +109,12 @@ app.get("/u/:shortURL", (req, res) => {
     res.render("url_registration", templateVars);
   });
   
-  //// GET endping for login
+  //// GET endpoint for login
   app.get("/login", (req, res) => {
     cookieID = req.cookies.user_id 
     username = users[cookieID]
     const templateVars = { [cookieID]: username };
-    res.render("/url_login", templateVars)
+    res.render("login", templateVars);
   });
 
 // POST Route Handlers -----------------------------\\
