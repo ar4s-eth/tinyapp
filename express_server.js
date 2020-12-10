@@ -6,12 +6,15 @@ Initial
 //------------------------------\\
 
 const express = require('express');
+const crypto = require('crypto'); // Random string generation module
+const bodyParser = require('body-parser'); // middleware: changes request body into a string
+const cookieParser = require('cookie-parser'); // middleware: helps to read values from cookies
+
 const app = express();
 const PORT = 8080;
-const crypto = require('crypto'); // Random string generation module
+
 app.set("view engine", "ejs"); // Setting ejs to be the view engine
-const bodyParser = require('body-parser'); // changes request body into a string
-//const { url } = require('inspector');
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 
 //--------------------------------------------------\\
@@ -42,21 +45,21 @@ app.get("/urls.json", (req, res) => {
 // && use res.render() to pass the templateVars(urlDatabase)
 // for urls_index to use
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 // New GET route to render the form for URL entry under the path /urls/new
 app.get("/urls/new", (req, res) => {
-  // console.log(`app.get/urls/new`, req.params)
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] }
+  res.render("urls_new", templateVars);
 });
 
 
 // Adds a new route for our shortURL key in req.params
 app.get("/urls/:shortURL", (req, res) => {
   // packaging up an object to send to the url_show template to reference
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("url_show", templateVars);
 });
 
@@ -73,6 +76,8 @@ app.get("*", (req, res) => {
   res.redirect("/urls/");
 });
 
+// POST Route Handlers -----------------------------\\
+
 // Post response path to handle the creation
 // of the 6 char shortURL (key) and assign it the
 // longURL (value).
@@ -83,6 +88,15 @@ app.post("/urls", (req, res) => {
   res.redirect(`urls/${shortURL}`);
 });
 
+// POST endpoint for username submission && initial cookie handling
+app.post("/login", (req, res) => {
+  username = req.body.username; // assign 
+  console.log(username)
+  res.cookie('username', username); //checks 
+  res.redirect("urls/")
+});
+
+// ********************* shortURL is not being deleted so the entry stays in urls after deletion *******
 // Route to allow for editing/deletion
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
@@ -97,6 +111,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect('/urls');
 });
+
 
 
 // Server's initial console log to make 
