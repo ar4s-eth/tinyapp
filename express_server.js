@@ -39,7 +39,7 @@ let users = {
   }  
 }
 
-
+const temp = Object.keys(users)
 // Function returns a random string of 6 characters a-Z, 0-9
 
 const generateRandomString = () => {
@@ -71,6 +71,7 @@ app.get("/urls/new", (req, res) => {
   //create a new object from the cookie
   cookieID = req.cookies.user_id 
   username = users[cookieID]
+  //export object to templates for _header to use.
   const templateVars = { username, urls: urlDatabase }
   console.log(templateVars)
   res.render("urls_new", templateVars);
@@ -139,6 +140,24 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
 // Add a new user to the global users object
   //include random id, email, password
+
+  // Check to make sure that both Email/Password were provided
+  if (req.body.email === "" || req.body.password === "") {
+    res.sendStatus(400);
+  }
+  // Check to see if the user already exists
+  let regEmail = req.body.email;
+  if (req.body.email && req.body.password) {
+    for(let user in users) {
+      if (regEmail === users[user]['email']) {
+        res.render("error_400");
+      }
+    }
+  }
+
+  
+
+
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
