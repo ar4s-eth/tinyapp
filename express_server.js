@@ -20,11 +20,24 @@ app.use(bodyParser.urlencoded({extended: true}));
 //--------------------------------------------------\\
 
 
-// Deftault Database Object
+// Database Objects
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xk": "http://www.google.com"
 };
+
+let users = {
+  "userID": {
+    id: "userID",
+    email: "user@example.com",
+    password: "something"
+  },
+  "userID2": {
+    id: "userID2",
+    email: "user2@example.com",
+    password: "something2"
+  }  
+}
 
 
 // Function returns a random string of 6 characters a-Z, 0-9
@@ -33,56 +46,56 @@ const generateRandomString = () => {
   return crypto.randomBytes(3).toString('hex');
 };
 
-// GET Route Handlers ----------------------\\
+//// GET Route Handlers ----------------------\\
 
-// Handler prints urlDatabase as a JSON object
-// (which can be viewed in the browser)
+//// Handler prints urlDatabase as a JSON object
+//// (which can be viewed in the browser)
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// Setting route hanlder for path "/urls"
-// && use res.render() to pass the templateVars(urlDatabase)
-// for urls_index to use
+//// Setting route hanlder for path "/urls"
+//// && use res.render() to pass the templateVars(urlDatabase)
+//// for urls_index to use
 app.get("/urls", (req, res) => {
   const templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
-// GET route to render the form for URL entry under the path /urls/new
+//// GET route to render the form for URL entry under the path /urls/new
 app.get("/urls/new", (req, res) => {
   const templateVars = { username: req.cookies["username"] }
   res.render("urls_new", templateVars);
 });
 
-
-
-// Adds a new route for our shortURL key in req.params
+//// Adds a new route for our shortURL key in req.params
 app.get("/urls/:shortURL", (req, res) => {
   // packaging up an object to send to the url_show template to reference
   const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("url_show", templateVars);
 });
 
-// Route will redirect any request to /u/shortURL
-// to its longURL in TinyApp
+//// Route will redirect any request to /u/shortURL
+//// to its longURL in TinyApp
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL]; // shortURL: longURL in urlDatabase
   res.redirect(longURL);
 });
 
-// Route to redirect all paths that don't exist to urls
+//// Route to redirect all paths that don't exist to urls
 // app.get("*", (req, res) => {
 //   res.redirect("/urls/");
 // });
 
-// GET endpoint for registration
+//// GET endpoint for registration
 app.get("/register", (req, res) => {
 console.log(`register`)
   const templateVars = { username: req.cookies["username"] }
   res.render("url_registration", templateVars);
 });
+
+
 // POST Route Handlers -----------------------------\\
 
 // Post response path to handle the creation
@@ -98,7 +111,7 @@ app.post("/urls", (req, res) => {
 // POST endpoint for username submission && initial cookie handling
 app.post("/login", (req, res) => {
   username = req.body.username; // assign 
-  // console.log(username)
+
   res.cookie('username', username); //checks 
   res.redirect("urls/");
 });
@@ -106,15 +119,19 @@ app.post("/login", (req, res) => {
 // POST endpoint for logout button that clears cookies
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
-  res.redirect("urls/")
+  res.redirect("urls/");
+});
 
-})
+// POST endpoint for registration
+app.post("/register", (req, res) => {
 
-// ********************* shortURL is not being deleted so the entry stays in urls after deletion *******
+});
+
+// ***BUG*** app.post("/urls/:id", (req, res) <- for editing
 // Route to allow for editing/deletion
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
-  // let longURL = req.body.longURL; // same as above
+  let longURL = req.body.longURL; // same as above
   
   // Deletes the entry in urlDatabase for
   // delete actions from the template (urls_index)
