@@ -91,10 +91,17 @@ app.post("/urls", (req, res) => {
 // POST endpoint for username submission && initial cookie handling
 app.post("/login", (req, res) => {
   username = req.body.username; // assign 
-  console.log(username)
+  // console.log(username)
   res.cookie('username', username); //checks 
-  res.redirect("urls/")
+  res.redirect("urls/");
 });
+
+// POST endpoint for logout button that clears cookies
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
+  res.redirect("urls/")
+
+})
 
 // ********************* shortURL is not being deleted so the entry stays in urls after deletion *******
 // Route to allow for editing/deletion
