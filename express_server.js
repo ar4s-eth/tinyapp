@@ -28,12 +28,12 @@ let urlDatabase = {
 
 let users = {
   "randomUserID": {
-    id: "randomUserID",
+    userID: "randomUserID",
     email: "user@example.com",
     password: "something"
   },
   "randomUserID2": {
-    id: "randomUserID2",
+    userID: "randomUserID2",
     email: "user2@example.com",
     password: "something2"
   }  
@@ -58,20 +58,31 @@ app.get("/urls.json", (req, res) => {
 //// && use res.render() to pass the templateVars(urlDatabase)
 //// for urls_index to use
 app.get("/urls", (req, res) => {
-  const templateVars = { username: req.cookies["username"], urls: urlDatabase };
+  cookieID = req.cookies.user_id 
+  username = users[cookieID]
+  const templateVars = { [cookieID]: username , urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 //// GET route to render the form for URL entry under the path /urls/new
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] }
+  // console.log(req.cookies)
+
+  //create a new object from the cookie
+  cookieID = req.cookies.user_id 
+  username = users[cookieID]
+  const templateVars = { username, urls: urlDatabase }
+  console.log(templateVars)
   res.render("urls_new", templateVars);
 });
 
 //// Adds a new route for our shortURL key in req.params
 app.get("/urls/:shortURL", (req, res) => {
-  // packaging up an object to send to the url_show template to reference
-  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  // packaging up an objects to send to the url_show template to reference
+  cookieID = req.cookies.user_id 
+  username = users[cookieID]
+  const templateVars = { [cookieID]: username , urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] }
+
   res.render("url_show", templateVars);
 });
 
@@ -90,8 +101,10 @@ app.get("/u/:shortURL", (req, res) => {
 
 //// GET endpoint for registration
 app.get("/register", (req, res) => {
-console.log(`register`)
-  const templateVars = { username: req.cookies["username"] }
+// console.log(`register`)
+  cookieID = req.cookies.user_id 
+  username = users[cookieID]
+  const templateVars = { [cookieID]: username };
   res.render("url_registration", templateVars);
 });
 
@@ -141,9 +154,9 @@ app.post("/register", (req, res) => {
   // Give them a cookie
   res.cookie('user_id', userID)
 
-  console.log(userID)
-  console.log(req.body)
-  console.log(users)
+  // console.log(userID)
+  // console.log(req.body)
+  // console.log(users)
   res.redirect("/urls")
 
 });
@@ -156,7 +169,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   
   // Deletes the entry in urlDatabase for
   // delete actions from the template (urls_index)
-  console.log(urlDatabase)
+  // console.log(urlDatabase)
   delete urlDatabase[shortURL];
   
   //longURL (value) is assigned to shortURL (key)
