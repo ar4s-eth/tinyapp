@@ -67,7 +67,7 @@ app.get("/urls", (req, res) => {
 //// GET route to render the form for URL entry under the path /urls/new
 app.get("/urls/new", (req, res) => {
   // console.log(req.cookies)
-
+  
   //create a new object from the cookie
   cookieID = req.cookies.user_id 
   username = users[cookieID]
@@ -83,7 +83,7 @@ app.get("/urls/:shortURL", (req, res) => {
   cookieID = req.cookies.user_id 
   username = users[cookieID]
   const templateVars = { [cookieID]: username , urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] }
-
+  
   res.render("url_show", templateVars);
 });
 
@@ -97,18 +97,25 @@ app.get("/u/:shortURL", (req, res) => {
 
 //// Route to redirect all paths that don't exist to urls
 // app.get("*", (req, res) => {
-//   res.redirect("/urls/");
-// });
-
-//// GET endpoint for registration
-app.get("/register", (req, res) => {
-// console.log(`register`)
-  cookieID = req.cookies.user_id 
-  username = users[cookieID]
-  const templateVars = { [cookieID]: username };
-  res.render("url_registration", templateVars);
-});
-
+  //   res.redirect("/urls/");
+  // });
+  
+  //// GET endpoint for registration
+  app.get("/register", (req, res) => {
+    // console.log(`register`)
+    cookieID = req.cookies.user_id 
+    username = users[cookieID]
+    const templateVars = { [cookieID]: username };
+    res.render("url_registration", templateVars);
+  });
+  
+  //// GET endping for login
+  app.get("/login", (req, res) => {
+    cookieID = req.cookies.user_id 
+    username = users[cookieID]
+    const templateVars = { [cookieID]: username };
+    res.render("/url_login", templateVars)
+  });
 
 // POST Route Handlers -----------------------------\\
 
@@ -153,10 +160,7 @@ app.post("/register", (req, res) => {
         res.render("error_400");
       }
     }
-  }
-
-  
-
+  };
 
   const userID = generateRandomString();
   const email = req.body.email;
