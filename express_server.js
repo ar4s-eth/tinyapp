@@ -49,11 +49,12 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// New GET route to render the form for URL entry under the path /urls/new
+// GET route to render the form for URL entry under the path /urls/new
 app.get("/urls/new", (req, res) => {
   const templateVars = { username: req.cookies["username"] }
   res.render("urls_new", templateVars);
 });
+
 
 
 // Adds a new route for our shortURL key in req.params
@@ -72,10 +73,16 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 // Route to redirect all paths that don't exist to urls
-app.get("*", (req, res) => {
-  res.redirect("/urls/");
-});
+// app.get("*", (req, res) => {
+//   res.redirect("/urls/");
+// });
 
+// GET endpoint for registration
+app.get("/register", (req, res) => {
+console.log(`register`)
+  const templateVars = { username: req.cookies["username"] }
+  res.render("url_registration", templateVars);
+});
 // POST Route Handlers -----------------------------\\
 
 // Post response path to handle the creation
@@ -107,15 +114,16 @@ app.post("/logout", (req, res) => {
 // Route to allow for editing/deletion
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
-  let longURL = req.body.longURL; // same as above
+  // let longURL = req.body.longURL; // same as above
   
   // Deletes the entry in urlDatabase for
   // delete actions from the template (urls_index)
+  console.log(urlDatabase)
   delete urlDatabase[shortURL];
   
   //longURL (value) is assigned to shortURL (key)
   // and replaced in the database
-  urlDatabase[shortURL] = longURL;
+  // urlDatabase[shortURL] = longURL;
   res.redirect('/urls');
 });
 
