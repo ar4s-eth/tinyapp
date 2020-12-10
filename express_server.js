@@ -27,13 +27,13 @@ let urlDatabase = {
 };
 
 let users = {
-  "userID": {
-    id: "userID",
+  "randomUserID": {
+    id: "randomUserID",
     email: "user@example.com",
     password: "something"
   },
-  "userID2": {
-    id: "userID2",
+  "randomUserID2": {
+    id: "randomUserID2",
     email: "user2@example.com",
     password: "something2"
   }  
@@ -124,6 +124,27 @@ app.post("/logout", (req, res) => {
 
 // POST endpoint for registration
 app.post("/register", (req, res) => {
+// Add a new user to the global users object
+  //include random id, email, password
+  const userID = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  // Create a user object
+  const user = {
+    userID,
+    email,
+    password
+  };
+  // Add new user to the database
+  users[userID] = user;
+  
+  // Give them a cookie
+  res.cookie('user_id', userID)
+
+  console.log(userID)
+  console.log(req.body)
+  console.log(users)
+  res.redirect("/urls")
 
 });
 
