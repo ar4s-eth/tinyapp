@@ -14,7 +14,7 @@
         <h5 class="card-title">Long URL for: <%= [longURL] %></h5>
           <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
         </div>
-        <form class="form-inline" style="margin: auto" action="/urls/<%= shortURL %>/delete" method="POST">
+        <form class="form-inline" style="margin: auto" action="/urls/<%= shortURL %>/edit" method="POST">
         <div class="form-group mb-2">
           <label for="Edit">Edit URL:</label>
           <input class="form-control" type="text" name="longURL" value= <%= [longURL] %>  style="width: 300px; margin: auto">

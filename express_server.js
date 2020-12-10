@@ -5,6 +5,8 @@ Initial
 */
 //------------------------------\\
 
+
+//BREAD *****************
 const express = require('express');
 const crypto = require('crypto'); // Random string generation module
 const bodyParser = require('body-parser'); // middleware: changes request body into a string
@@ -39,7 +41,6 @@ let users = {
   }  
 }
 
-const temp = Object.keys(users)
 // Function returns a random string of 6 characters a-Z, 0-9
 
 const generateRandomString = () => {
@@ -54,13 +55,21 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+app.get("/users.json", (req, res) => {
+  res.json(users);
+});
+
 //// Setting route hanlder for path "/urls"
 //// && use res.render() to pass the templateVars(urlDatabase)
 //// for urls_index to use
 app.get("/urls", (req, res) => {
-  cookieID = req.cookies.user_id 
-  username = users[cookieID]
-  const templateVars = { [cookieID]: username , urls: urlDatabase };
+  // get the user's id from the cookie
+  const userID = req.cookies.user_id
+  // pair && assign 
+  const user = users[userID]
+  
+  const templateVars = { user , urls: urlDatabase };
+  console.log(`get urls`, templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -68,21 +77,22 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   // console.log(req.cookies)
   
-  //create a new object from the cookie
-  cookieID = req.cookies.user_id 
-  username = users[cookieID]
-  //export object to templates for _header to use.
-  const templateVars = { username, urls: urlDatabase }
+  const userID = req.cookies.user_id
+  // pair && assign 
+  const user = users[userID]
+  
+  const templateVars = { user , urls: urlDatabase };
   console.log(templateVars)
   res.render("urls_new", templateVars);
 });
 
 //// Adds a new route for our shortURL key in req.params
 app.get("/urls/:shortURL", (req, res) => {
-  // packaging up an objects to send to the url_show template to reference
-  cookieID = req.cookies.user_id 
-  username = users[cookieID]
-  const templateVars = { [cookieID]: username , urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] }
+  const userID = req.cookies.user_id
+  // pair && assign 
+  const user = users[userID]
+
+  const templateVars = { user , urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] }
   
   res.render("url_show", templateVars);
 });
@@ -103,25 +113,36 @@ app.get("/u/:shortURL", (req, res) => {
   //// GET endpoint for registration
   app.get("/register", (req, res) => {
     // console.log(`register`)
-    cookieID = req.cookies.user_id 
-    username = users[cookieID]
-    const templateVars = { [cookieID]: username };
+
+    // cookieID = req.cookies.user_id 
+    const userID = req.cookies.user_id
+    // pair && assign 
+    const user = users[userID]
+    
+    const templateVars = { user , urls: urlDatabase };
     res.render("url_registration", templateVars);
   });
   
   //// GET endpoint for login
-  app.get("/login", (req, res) => {
-    cookieID = req.cookies.user_id 
-    username = users[cookieID]
-    const templateVars = { [cookieID]: username };
+    app.get("/login", (req, res) => {
+      
+    const userID = req.cookies.user_id
+    // pair && assign 
+    const user = users[userID]
+    
+    const templateVars = { user , urls: urlDatabase };
     res.render("login", templateVars);
   });
 
+
+
+
+
+
 // POST Route Handlers -----------------------------\\
 
-// Post response path to handle the creation
-// of the 6 char shortURL (key) and assign it the
-// longURL (value).
+
+// shortURL creation and longURL association
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString(); //generate 6 char string
   urlDatabase[shortURL] = req.body.longURL; // shortURL: longURL key/value pair
@@ -129,21 +150,26 @@ app.post("/urls", (req, res) => {
   res.redirect(`urls/${shortURL}`);
 });
 
-// POST endpoint for username submission && initial cookie handling
+// Username submission && initial cookie handling
 app.post("/login", (req, res) => {
   username = req.body.username; // assign 
-
+  console.log(req.body)
+  if (req.body.login) {
+    res.redirect("login")
+  }
   res.cookie('username', username); //checks 
   res.redirect("urls/");
 });
 
-// POST endpoint for logout button that clears cookies
+// Clear Cookies
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  console.log(req.body)
+  //clears the name of the cookie in the browser
+  res.clearCookie('user_id');
   res.redirect("urls/");
 });
 
-// POST endpoint for registration
+// Registration
 app.post("/register", (req, res) => {
 // Add a new user to the global users object
   //include random id, email, password
@@ -177,18 +203,17 @@ app.post("/register", (req, res) => {
   // Give them a cookie
   res.cookie('user_id', userID)
 
-  // console.log(userID)
-  // console.log(req.body)
-  // console.log(users)
+  // Send them to the List
   res.redirect("/urls")
 
 });
 
-// ***BUG*** app.post("/urls/:id", (req, res) <- for editing
-// Route to allow for editing/deletion
+// *******************************
+// Editing/deletion (Broken) 
+// Should have an app.post("/urls/:id") to handle
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
-  let longURL = req.body.longURL; // same as above
+  // let longURL = req.body.longURL; // same as above
   
   // Deletes the entry in urlDatabase for
   // delete actions from the template (urls_index)
@@ -198,6 +223,22 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   //longURL (value) is assigned to shortURL (key)
   // and replaced in the database
   // urlDatabase[shortURL] = longURL;
+  res.redirect('/urls');
+});
+app.post("/urls/:shortURL/edit", (req, res) => {
+  let shortURL = req.params.shortURL; // assign for easy reference
+  console.log(`in shortURL/edit`, shortURL)
+  let longURL = req.body.longURL; // same as above
+  console.log(`in shortURL/edit`, longURL)
+  
+  // Deletes the entry in urlDatabase for
+  // delete actions from the template (urls_index)
+  // console.log(urlDatabase)
+  // delete urlDatabase[shortURL];
+  
+  //longURL (value) is assigned to shortURL (key)
+  // and replaced in the database
+  urlDatabase[shortURL] = longURL;
   res.redirect('/urls');
 });
 
