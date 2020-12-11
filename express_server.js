@@ -5,8 +5,6 @@ Initial
 */
 //------------------------------\\
 
-
-//BREAD *****************
 const express = require('express');
 const crypto = require('crypto'); // Random string generation module
 const bodyParser = require('body-parser'); // middleware: changes request body into a string
@@ -29,8 +27,8 @@ const urlDatabase = {
 };
 
 let users = {
-  "randomUserID": {
-    userID: "randomUserID",
+  "aJ48lW": {
+    userID: "aJ48lW",
     email: "user@example.com",
     password: "something"
   },
@@ -41,10 +39,23 @@ let users = {
   }  
 }
 
-// Function returns a random string of 6 characters a-Z, 0-9
+// ---- Helper Functions ---- \\
 
+// Function returns a random string 
+// of 6 characters a-Z, 0-9
 const generateRandomString = () => {
   return crypto.randomBytes(3).toString('hex');
+};
+
+// Filter DB entries by User ID
+const filterURLs = (database, user) => {
+  const filteredDB = {};
+  for (let url in database) {
+    if (database[url].userID === user) {
+      filteredDB[url] = database[url];
+    }
+  }
+  return filteredDB;
 };
 
 //// GET Route Handlers ----------------------\\
@@ -54,7 +65,7 @@ const generateRandomString = () => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
+//// Handler prints the user Database
 app.get("/users.json", (req, res) => {
   res.json(users);
 });
@@ -67,14 +78,17 @@ app.get("/urls", (req, res) => {
   const userID = req.cookies.user_id
   // pair && assign 
   const user = users[userID]
-  
+
   // Redirect users that aren't logged in
   if (!userID) {
     return res.redirect("/login")
   }
-  
-  const templateVars = { user , urls: urlDatabase };
-  console.log(`get urls`, templateVars);
+  //filter the urlDatabase by the userID
+  let userURLs = filterURLs(urlDatabase, userID)
+
+  // Consolidate data for template
+  const templateVars = { user , urls: userURLs };
+
   res.render("urls_index", templateVars);
 });
 
@@ -90,9 +104,12 @@ app.get("/urls/new", (req, res) => {
 
   // pair && assign 
   const user = users[userID]
-  
-  const templateVars = { user , urls: urlDatabase };
-  // console.log(templateVars)
+
+  //filter the urlDatabase by the userID
+  let userURLs = filterURLs(urlDatabase, userID)
+
+  // Consolidate data for template
+  const templateVars = { user , urls: userURLs };
   res.render("urls_new", templateVars);
 });
 
@@ -102,8 +119,12 @@ app.get("/urls/:shortURL", (req, res) => {
   // pair && assign 
   const user = users[userID]
 
-  const templateVars = { user , urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] }
-  
+  const templateVars = { 
+    user, 
+    urls: urlDatabase,
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL] 
+  }
   res.render("url_show", templateVars);
 });
 
@@ -111,7 +132,7 @@ app.get("/urls/:shortURL", (req, res) => {
 //// to its longURL in TinyApp
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL]; // shortURL: longURL in urlDatabase
+  const longURL = userURLs[shortURL]; // shortURL: longURL in urlDatabase
   res.redirect(longURL);
 });
 
@@ -125,7 +146,7 @@ app.get("/register", (req, res) => {
   // pair && assign property
   const user = users[userID]
   
-  const templateVars = { user , urls: urlDatabase };
+  const templateVars = { user }; // had -> urls: urlDatabase 
   res.render("url_registration", templateVars);
 });
 
@@ -136,9 +157,11 @@ app.get("/register", (req, res) => {
   // pair && assign 
   const user = users[userID]
   
-  const templateVars = { user , urls: urlDatabase };
+  const templateVars = { user } // had -> urls: urlDatabase;
   res.render("login", templateVars);
+
 });
+
 
 
 
@@ -157,7 +180,7 @@ app.post("/urls", (req, res) => {
   let longURL = req.body.longURL
   // console.log(`urls longURL`, longURL)
 
-  // Old way to commit to the database
+  // Depreciated way to add to the urlDatabase
   // urlDatabase[shortURL] = req.body.longURL;
 
   // Add shortURL {longURL, userID} to the database
@@ -252,9 +275,8 @@ app.post("/register", (req, res) => {
 
 });
 
-// *******************************
-// Editing/deletion (Broken) 
-// Should have an app.post("/urls/:id") to handle
+
+// Delete endpoint
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
   // let longURL = req.body.longURL; // same as above
@@ -269,6 +291,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   // urlDatabase[shortURL] = longURL;
   res.redirect('/urls');
 });
+// Edit endpoint
 app.post("/urls/:shortURL/edit", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
   // console.log(`in shortURL/edit`, shortURL)
