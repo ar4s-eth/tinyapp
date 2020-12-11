@@ -68,6 +68,11 @@ app.get("/urls", (req, res) => {
   // pair && assign 
   const user = users[userID]
   
+  // Redirect users that aren't logged in
+  if (!userID) {
+    return res.redirect("/login")
+  }
+  
   const templateVars = { user , urls: urlDatabase };
   console.log(`get urls`, templateVars);
   res.render("urls_index", templateVars);
