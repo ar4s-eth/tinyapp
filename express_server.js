@@ -110,34 +110,30 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//// Route to redirect all paths that don't exist to urls
-// app.get("*", (req, res) => {
-  //   res.redirect("/urls/");
-  // });
   
-  //// GET endpoint for registration
-  app.get("/register", (req, res) => {
-    // console.log(`register`)
+//// GET endpoint for registration
+app.get("/register", (req, res) => {
+  // console.log(`register`)
 
-    // cookieID = req.cookies.user_id 
-    const userID = req.cookies.user_id
-    // pair && assign 
-    const user = users[userID]
-    
-    const templateVars = { user , urls: urlDatabase };
-    res.render("url_registration", templateVars);
-  });
+  // cookieID = req.cookies.user_id 
+  const userID = req.cookies.user_id
+  // pair && assign property
+  const user = users[userID]
   
-  //// GET endpoint for login
-    app.get("/login", (req, res) => {
-      
-    const userID = req.cookies.user_id
-    // pair && assign 
-    const user = users[userID]
+  const templateVars = { user , urls: urlDatabase };
+  res.render("url_registration", templateVars);
+});
+
+//// GET endpoint for login
+  app.get("/login", (req, res) => {
     
-    const templateVars = { user , urls: urlDatabase };
-    res.render("login", templateVars);
-  });
+  const userID = req.cookies.user_id
+  // pair && assign 
+  const user = users[userID]
+  
+  const templateVars = { user , urls: urlDatabase };
+  res.render("login", templateVars);
+});
 
 
 
@@ -150,7 +146,21 @@ app.get("/u/:shortURL", (req, res) => {
 // shortURL creation and longURL association
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString(); //generate 6 char string
-  urlDatabase[shortURL] = req.body.longURL; // shortURL: longURL key/value pair
+
+  const userID = req.cookies.user_id;
+  console.log(`urls userID`, userID)
+  let longURL = req.body.longURL
+  console.log(`urls longURL`, longURL)
+
+  // Old way to commit to the database
+  // urlDatabase[shortURL] = req.body.longURL;
+
+   
+  urlDatabase[shortURL] = { 
+    longURL, 
+    userID
+  }
+
   // redirect to the new shortURL path
   res.redirect(`urls/${shortURL}`);
 });
