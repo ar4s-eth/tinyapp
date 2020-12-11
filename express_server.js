@@ -78,6 +78,11 @@ app.get("/urls/new", (req, res) => {
   // console.log(req.cookies)
   
   const userID = req.cookies.user_id
+  // If no userID, redirect to login
+  if (!userID) {
+    return res.redirect("/login")
+  }
+
   // pair && assign 
   const user = users[userID]
   
