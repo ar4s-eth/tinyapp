@@ -69,7 +69,7 @@ app.get("/urls", (req, res) => {
   const user = users[userID]
   
   const templateVars = { user , urls: urlDatabase };
-  console.log(`get urls`, templateVars);
+  // console.log(`get urls`, templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -82,7 +82,7 @@ app.get("/urls/new", (req, res) => {
   const user = users[userID]
   
   const templateVars = { user , urls: urlDatabase };
-  console.log(templateVars)
+  // console.log(templateVars)
   res.render("urls_new", templateVars);
 });
 
@@ -152,18 +152,41 @@ app.post("/urls", (req, res) => {
 
 // Username submission && initial cookie handling
 app.post("/login", (req, res) => {
-  username = req.body.username; // assign 
-  console.log(req.body)
-  if (req.body.login) {
-    res.redirect("login")
+  const userID = req.body.username; // assign 
+
+  // Check to see if the user already exists
+  // DRY this up later
+  let loginEmail = req.body.email;
+  let loginPass = req.body.password;
+
+  // Check to make sure that both Email/Password were provided
+  if (loginEmail === "" || loginPass === "") {
+    return res.status(403).send('Email/Pass are empty');
   }
-  res.cookie('username', username); //checks 
-  res.redirect("urls/");
+  // Check to see if the user already exists
+  if (loginEmail && loginPass) {
+    for (let user in users) {
+      console.log(`login`, users[user]);
+      if (loginEmail === users[user]['email'] && loginPass === users[user]['password']) {
+        return res.cookie('user_id', user).redirect("/urls")
+      } 
+      if (loginEmail === users[user]['email'] && loginPass !== users[user]['password']) {
+        return res.sendStatus(403);
+      }
+    }
+    return res.sendStatus(403);
+  } 
 });
 
 // Clear Cookies
 app.post("/logout", (req, res) => {
   console.log(req.body)
+
+  // if (req.body.email === "" || req.body.password === "") {
+  //   res.sendStatus(400);
+  // }
+
+
   //clears the name of the cookie in the browser
   res.clearCookie('user_id');
   res.redirect("urls/");
@@ -182,8 +205,9 @@ app.post("/register", (req, res) => {
   let regEmail = req.body.email;
   if (req.body.email && req.body.password) {
     for(let user in users) {
+      console.log(`register`, users[user])
       if (regEmail === users[user]['email']) {
-        res.render("error_400");
+        res.sendStatus(400);
       }
     }
   };
