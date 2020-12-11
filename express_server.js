@@ -23,9 +23,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 // Database Objects
-let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xk": "http://www.google.com"
+const urlDatabase = {
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 let users = {
@@ -69,7 +69,7 @@ app.get("/urls", (req, res) => {
   const user = users[userID]
   
   const templateVars = { user , urls: urlDatabase };
-  // console.log(`get urls`, templateVars);
+  console.log(`get urls`, templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -148,14 +148,14 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString(); //generate 6 char string
 
   const userID = req.cookies.user_id;
-  console.log(`urls userID`, userID)
+  // console.log(`urls userID`, userID)
   let longURL = req.body.longURL
-  console.log(`urls longURL`, longURL)
+  // console.log(`urls longURL`, longURL)
 
   // Old way to commit to the database
   // urlDatabase[shortURL] = req.body.longURL;
 
-   
+  // Add shortURL {longURL, userID} to the database
   urlDatabase[shortURL] = { 
     longURL, 
     userID
@@ -181,7 +181,7 @@ app.post("/login", (req, res) => {
   // Check to see if the user already exists
   if (loginEmail && loginPass) {
     for (let user in users) {
-      console.log(`login`, users[user]);
+      // console.log(`login`, users[user]);
       if (loginEmail === users[user]['email'] && loginPass === users[user]['password']) {
         return res.cookie('user_id', user).redirect("/urls")
       } 
@@ -195,7 +195,7 @@ app.post("/login", (req, res) => {
 
 // Clear Cookies
 app.post("/logout", (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
 
   // if (req.body.email === "" || req.body.password === "") {
   //   res.sendStatus(400);
@@ -220,7 +220,7 @@ app.post("/register", (req, res) => {
   let regEmail = req.body.email;
   if (req.body.email && req.body.password) {
     for(let user in users) {
-      console.log(`register`, users[user])
+      // console.log(`register`, users[user])
       if (regEmail === users[user]['email']) {
         return res.sendStatus(400);
       }
@@ -266,9 +266,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 app.post("/urls/:shortURL/edit", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
-  console.log(`in shortURL/edit`, shortURL)
+  // console.log(`in shortURL/edit`, shortURL)
   let longURL = req.body.longURL; // same as above
-  console.log(`in shortURL/edit`, longURL)
+  // console.log(`in shortURL/edit`, longURL)
   
   // Deletes the entry in urlDatabase for
   // delete actions from the template (urls_index)
