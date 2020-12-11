@@ -238,8 +238,8 @@ app.post("/logout", (req, res) => {
 // Registration
 app.post("/register", (req, res) => {
 // Add a new user to the global users object
-  //include random id, email, password
 
+  // Registration Logic
   // Check to make sure that both Email/Password were provided
   if (req.body.email === "" || req.body.password === "") {
     return res.sendStatus(400);
@@ -255,6 +255,8 @@ app.post("/register", (req, res) => {
     }
   };
 
+  // Generate the userID, fetch email/password
+  // from form
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
@@ -279,18 +281,20 @@ app.post("/register", (req, res) => {
 // Delete endpoint
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
-  // let longURL = req.body.longURL; // same as above
+
+  // Import cookie/user_id
+  const userID = req.cookies.user_id
   
-  // Deletes the entry in urlDatabase for
-  // delete actions from the template (urls_index)
-  // console.log(urlDatabase)
-  delete urlDatabase[shortURL];
+  // Only a user can delete their URLs
+  if (userID && urlDatabase[shortURL].userID === userID) {
+    delete urlDatabase[shortURL];
+  }
+
   
-  //longURL (value) is assigned to shortURL (key)
-  // and replaced in the database
-  // urlDatabase[shortURL] = longURL;
+
   res.redirect('/urls');
 });
+
 // Edit endpoint
 app.post("/urls/:shortURL/edit", (req, res) => {
   let shortURL = req.params.shortURL; // assign for easy reference
@@ -298,14 +302,18 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   let longURL = req.body.longURL; // same as above
   // console.log(`in shortURL/edit`, longURL)
   
-  // Deletes the entry in urlDatabase for
-  // delete actions from the template (urls_index)
-  // console.log(urlDatabase)
-  // delete urlDatabase[shortURL];
+  // Import cookie/user_id
+  const userID = req.cookies.user_id
   
-  //longURL (value) is assigned to shortURL (key)
-  // and replaced in the database
-  urlDatabase[shortURL] = longURL;
+  // Only a user can edit their URLS
+  if (userID && urlDatabase[shortURL].userID === userID) {
+    //longURL (value) && userID are assigned to 
+    // shortURL (key) and replaced in the database
+    urlDatabase[shortURL] = { 
+      longURL, 
+      userID
+    }
+  }
   res.redirect('/urls');
 });
 
