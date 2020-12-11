@@ -152,7 +152,6 @@ app.post("/urls", (req, res) => {
 
 // Username submission && initial cookie handling
 app.post("/login", (req, res) => {
-  const userID = req.body.username; // assign 
 
   // Check to see if the user already exists
   // DRY this up later
@@ -163,6 +162,7 @@ app.post("/login", (req, res) => {
   if (loginEmail === "" || loginPass === "") {
     return res.status(403).send('Email/Pass are empty');
   }
+
   // Check to see if the user already exists
   if (loginEmail && loginPass) {
     for (let user in users) {
@@ -199,7 +199,7 @@ app.post("/register", (req, res) => {
 
   // Check to make sure that both Email/Password were provided
   if (req.body.email === "" || req.body.password === "") {
-    res.sendStatus(400);
+    return res.sendStatus(400);
   }
   // Check to see if the user already exists
   let regEmail = req.body.email;
@@ -207,7 +207,7 @@ app.post("/register", (req, res) => {
     for(let user in users) {
       console.log(`register`, users[user])
       if (regEmail === users[user]['email']) {
-        res.sendStatus(400);
+        return res.sendStatus(400);
       }
     }
   };
