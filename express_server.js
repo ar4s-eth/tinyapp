@@ -4,15 +4,18 @@ Initial
     Modules && Dependencies
 */
 //------------------------------\\
-
+// Server Initialization
 const express = require('express');
-const crypto = require('crypto'); // Random string generation module
-const bodyParser = require('body-parser'); // middleware: changes request body into a string
-const cookieParser = require('cookie-parser'); // middleware: helps to read values from cookies
-
 const app = express();
 const PORT = 8080;
 
+// Middleware && Modules
+const bodyParser = require('body-parser'); 
+const cookieParser = require('cookie-parser');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+
+// Setup
 app.set("view engine", "ejs"); // Setting ejs to be the view engine
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -208,10 +211,14 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Email/Pass are empty');
   }
 
+  // Password hash checks
+  // const user = users[userID]
+  // const hashedPassword = users[user]['password']
+  
   // Check to see if the user already exists
   if (loginEmail && loginPass) {
     for (let user in users) {
-      if (loginEmail === users[user]['email'] && loginPass === users[user]['password']) {
+      if (loginEmail === users[user]['email'] && bcrypt.compareSync(loginPass, users[user]['password'])) {
         return res.cookie('user_id', user).redirect("/urls");
       }
       if (loginEmail === users[user]['email'] && loginPass !== users[user]['password']) {
@@ -220,7 +227,9 @@ app.post("/login", (req, res) => {
     }
     return res.sendStatus(403);
   }
+  console.log(`hashedPassword`, hashedPassword)
 });
+
 
 // Clearing Cookies
 app.post("/logout", (req, res) => {
@@ -255,11 +264,14 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  // Password hashing
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   // Create a user object
   const user = {
     userID,
     email,
-    password
+    password: hashedPassword
   };
 
   // Add new user to the database
