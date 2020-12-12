@@ -14,11 +14,19 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const cookieSession = require('cookie-sesion')
 
 // Setup
 app.set("view engine", "ejs"); // Setting ejs to be the view engine
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieSession({
+  name: 'session',
+  keys: [/* secret keys */],
+  
+  //Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 //--------------------------------------------------\\
 
@@ -30,16 +38,11 @@ const urlDatabase = {
 };
 
 const users = {
-  "aJ48lW": {
-    userID: "aJ48lW",
-    email: "user@example.com",
-    password: "something"
-  },
-  "randomUserID2": {
-    userID: "randomUserID2",
-    email: "user2@example.com",
-    password: "something2"
-  }
+   "c48c66": {
+    userID: "c48c66",
+    email: "ashley.barr@ar4s.com",
+    password: "$2b$10$4ZFUixhfamneXZUdOYIQL..vU4V83La1/hutpe4YwUPp0lT1BPrdO"
+    }
 };
 
 // ---- Helper Functions ---- \\
