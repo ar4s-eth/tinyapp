@@ -26,7 +26,7 @@ const urlDatabase = {
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
-let users = {
+const users = {
   "aJ48lW": {
     userID: "aJ48lW",
     email: "user@example.com",
@@ -36,12 +36,12 @@ let users = {
     userID: "randomUserID2",
     email: "user2@example.com",
     password: "something2"
-  }  
-}
+  }
+};
 
 // ---- Helper Functions ---- \\
 
-// Function returns a random string 
+// Function returns a random string
 // of 6 characters a-Z, 0-9
 const generateRandomString = () => {
   return crypto.randomBytes(3).toString('hex');
@@ -58,33 +58,34 @@ const filterURLs = (database, user) => {
   return filteredDB;
 };
 
-//// GET Route Handlers ----------------------\\
+
+//// GET Route Handlers ----------------------\\\\
 
 //// Handler prints urlDatabase as a JSON object
-//// (which can be viewed in the browser)
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
 //// Handler prints the user Database
 app.get("/users.json", (req, res) => {
   res.json(users);
 });
 
-//// Setting route hanlder for path "/urls"
-//// && use res.render() to pass the templateVars(urlDatabase)
-//// for urls_index to use
+//// Routing/Handling for the index
 app.get("/urls", (req, res) => {
-  // get the user's id from the cookie
-  const userID = req.cookies.user_id
-  // pair && assign 
-  const user = users[userID]
+  // Get the user id from the cookie
+  const userID = req.cookies.user_id;
+
+  // Assing user from user DB
+  const user = users[userID];
 
   // Redirect users that aren't logged in
   if (!userID) {
-    return res.redirect("/login")
+    return res.redirect("/login");
   }
-  //filter the urlDatabase by the userID
-  let userURLs = filterURLs(urlDatabase, userID)
+
+  // Filter the urlDatabase by the userID
+  let userURLs = filterURLs(urlDatabase, userID);
 
   // Consolidate data for template
   const templateVars = { user , urls: userURLs };
@@ -92,112 +93,113 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//// GET route to render the form for URL entry under the path /urls/new
+//// Routing/Handling for creating shortURLs
 app.get("/urls/new", (req, res) => {
-  // console.log(req.cookies)
-  
-  const userID = req.cookies.user_id
+  // Get the user id from the cookie
+  const userID = req.cookies.user_id;
+
   // If no userID, redirect to login
   if (!userID) {
-    return res.redirect("/login")
+    return res.redirect("/login");
   }
 
-  // pair && assign 
-  const user = users[userID]
+  // Assing user from user DB
+  const user = users[userID];
 
-  //filter the urlDatabase by the userID
-  let userURLs = filterURLs(urlDatabase, userID)
+  // Filter the urlDatabase by the userID
+  let userURLs = filterURLs(urlDatabase, userID);
 
   // Consolidate data for template
   const templateVars = { user , urls: userURLs };
+
   res.render("urls_new", templateVars);
 });
 
-//// Adds a new route for our shortURL key in req.params
+//// Routing/Handling for shortURLs
 app.get("/urls/:shortURL", (req, res) => {
-  const userID = req.cookies.user_id
-  // pair && assign 
-  const user = users[userID]
+  // Get the user id from the cookie
+  const userID = req.cookies.user_id;
 
-  const templateVars = { 
-    user, 
+  // Assing user from user DB
+  const user = users[userID];
+
+  // Consolidate data for template
+  const templateVars = {
+    user,
     urls: urlDatabase,
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL] 
-  }
+    longURL: urlDatabase[req.params.shortURL]
+  };
+
   res.render("url_show", templateVars);
 });
 
-//// Route will redirect any request to /u/shortURL
-//// to its longURL in TinyApp
+//// Routing for shortURL links
 app.get("/u/:shortURL", (req, res) => {
+  // Fetch shortURL
   const shortURL = req.params.shortURL;
-  const longURL = userURLs[shortURL]; // shortURL: longURL in urlDatabase
+
+  // Add shortURL: longURL to urlDatabase
+  const longURL = urlDatabase[shortURL].longURL;
+
   res.redirect(longURL);
 });
 
-  
-//// GET endpoint for registration
+//// Routing/Handling for user Registration
 app.get("/register", (req, res) => {
-  // console.log(`register`)
+  // Get the user id from the cookie
+  const userID = req.cookies.user_id;
 
-  // cookieID = req.cookies.user_id 
-  const userID = req.cookies.user_id
-  // pair && assign property
-  const user = users[userID]
+  // Assing user from user DB
+  const user = users[userID];
   
-  const templateVars = { user }; // had -> urls: urlDatabase 
+  // Consolidate data for template
+  const templateVars = { user };
+
   res.render("url_registration", templateVars);
 });
 
-//// GET endpoint for login
-  app.get("/login", (req, res) => {
-    
-  const userID = req.cookies.user_id
-  // pair && assign 
-  const user = users[userID]
+//// Routing/Handling for user login
+app.get("/login", (req, res) => {
+  // Get the user id from the cookie
+  const userID = req.cookies.user_id;
+
+  // Assing user from user DB
+  const user = users[userID];
   
-  const templateVars = { user } // had -> urls: urlDatabase;
+  // Consolidate data for template
+  const templateVars = { user };
+
   res.render("login", templateVars);
-
 });
-
-
-
-
-
 
 
 // POST Route Handlers -----------------------------\\
 
-
-// shortURL creation and longURL association
+// shortURL creation/longURL association
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString(); //generate 6 char string
+  // Generate a random 6 char string
+  let shortURL = generateRandomString();
 
+  // Get the user id from the cookie
   const userID = req.cookies.user_id;
-  // console.log(`urls userID`, userID)
-  let longURL = req.body.longURL
-  // console.log(`urls longURL`, longURL)
+  
+  // Assing user from user DB
+  let longURL = req.body.longURL;
 
-  // Depreciated way to add to the urlDatabase
-  // urlDatabase[shortURL] = req.body.longURL;
-
-  // Add shortURL {longURL, userID} to the database
-  urlDatabase[shortURL] = { 
-    longURL, 
+  // Add shortURL && {longURL, userID} to the database
+  urlDatabase[shortURL] = {
+    longURL,
     userID
-  }
+  };
 
-  // redirect to the new shortURL path
   res.redirect(`urls/${shortURL}`);
 });
 
 // Username submission && initial cookie handling
 app.post("/login", (req, res) => {
 
-  // Check to see if the user already exists
-  // DRY this up later
+  // Grab credentials from form
   let loginEmail = req.body.email;
   let loginPass = req.body.password;
 
@@ -209,29 +211,22 @@ app.post("/login", (req, res) => {
   // Check to see if the user already exists
   if (loginEmail && loginPass) {
     for (let user in users) {
-      // console.log(`login`, users[user]);
       if (loginEmail === users[user]['email'] && loginPass === users[user]['password']) {
-        return res.cookie('user_id', user).redirect("/urls")
-      } 
+        return res.cookie('user_id', user).redirect("/urls");
+      }
       if (loginEmail === users[user]['email'] && loginPass !== users[user]['password']) {
         return res.sendStatus(403);
       }
     }
     return res.sendStatus(403);
-  } 
+  }
 });
 
-// Clear Cookies
+// Clearing Cookies
 app.post("/logout", (req, res) => {
-  // console.log(req.body)
 
-  // if (req.body.email === "" || req.body.password === "") {
-  //   res.sendStatus(400);
-  // }
-
-
-  //clears the name of the cookie in the browser
   res.clearCookie('user_id');
+
   res.redirect("urls/");
 });
 
@@ -240,86 +235,83 @@ app.post("/register", (req, res) => {
 // Add a new user to the global users object
 
   // Registration Logic
-  // Check to make sure that both Email/Password were provided
+  // Check Email/Password were provided
   if (req.body.email === "" || req.body.password === "") {
     return res.sendStatus(400);
   }
   // Check to see if the user already exists
   let regEmail = req.body.email;
   if (req.body.email && req.body.password) {
-    for(let user in users) {
-      // console.log(`register`, users[user])
+    for (let user in users) {
       if (regEmail === users[user]['email']) {
         return res.sendStatus(400);
       }
     }
-  };
+  }
 
-  // Generate the userID, fetch email/password
-  // from form
+  // Generate the userID,
+  // fetch email/password from form
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+
   // Create a user object
   const user = {
     userID,
     email,
     password
   };
+
   // Add new user to the database
   users[userID] = user;
   
   // Give them a cookie
-  res.cookie('user_id', userID)
+  res.cookie('user_id', userID);
 
-  // Send them to the List
-  res.redirect("/urls")
-
+  // Send them to the index
+  res.redirect("/urls");
 });
 
 
-// Delete endpoint
+// shortURL Deletion
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let shortURL = req.params.shortURL; // assign for easy reference
+  // Grab shortURL from form
+  let shortURL = req.params.shortURL;
 
   // Import cookie/user_id
-  const userID = req.cookies.user_id
+  const userID = req.cookies.user_id;
   
   // Only a user can delete their URLs
   if (userID && urlDatabase[shortURL].userID === userID) {
     delete urlDatabase[shortURL];
   }
-
-  
-
   res.redirect('/urls');
 });
 
-// Edit endpoint
+// shortURL Editing
 app.post("/urls/:shortURL/edit", (req, res) => {
-  let shortURL = req.params.shortURL; // assign for easy reference
-  // console.log(`in shortURL/edit`, shortURL)
-  let longURL = req.body.longURL; // same as above
-  // console.log(`in shortURL/edit`, longURL)
+  // Grab shortURL from params
+  let shortURL = req.params.shortURL;
+
+  // Grab longURL from form
+  let longURL = req.body.longURL;
   
   // Import cookie/user_id
-  const userID = req.cookies.user_id
+  const userID = req.cookies.user_id;
   
   // Only a user can edit their URLS
   if (userID && urlDatabase[shortURL].userID === userID) {
-    //longURL (value) && userID are assigned to 
-    // shortURL (key) and replaced in the database
-    urlDatabase[shortURL] = { 
-      longURL, 
+    urlDatabase[shortURL] = {
+      longURL,
       userID
-    }
+    };
   }
   res.redirect('/urls');
 });
 
 
 
-// Server's initial console log to make 
+// Server's initial console log to make
 // sure it's listening for requests
 app.listen(PORT, () => {
   console.log(`TinyApp server listening on port ${PORT}!`);

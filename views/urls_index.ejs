@@ -26,7 +26,7 @@
         <!-- prints out the url properties from the templateVars object -->
         <% for(let url in urls) { %>
           <tr>
-            <td><%= url %></td> 
+            <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
             <td><form action="/urls/<%= url %> "><button type="submit" class="btn btn-secondary">Edit</button></form></td>
             
