@@ -11,18 +11,16 @@ const PORT = 8080;
 
 // Middleware && Modules
 const bodyParser = require('body-parser'); 
-const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
-const cookieSession = require('cookie-sesion')
+const cookieSession = require('cookie-session')
 
 // Setup
 app.set("view engine", "ejs"); // Setting ejs to be the view engine
-app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
-  keys: [/* secret keys */],
+  keys: ['meowmeow'],
   
   //Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -33,16 +31,16 @@ app.use(cookieSession({
 
 // Database Objects
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "148c66" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "148c66" }
 };
 
 const users = {
-   "c48c66": {
-    userID: "c48c66",
+  '148c66': {
+    userID: "148c66",
     email: "ashley.barr@ar4s.com",
-    password: "$2b$10$4ZFUixhfamneXZUdOYIQL..vU4V83La1/hutpe4YwUPp0lT1BPrdO"
-    }
+    password: "$2b$10$79TYXaWXeHygAJaq/ah2Iu1TKlwMgaqL3RZdHFkfc4aop5Wkth2zG"
+  }
 };
 
 // ---- Helper Functions ---- \\
@@ -64,6 +62,16 @@ const filterURLs = (database, user) => {
   return filteredDB;
 };
 
+// Cookie Authorization
+// const authorize = (req, res, next) => {
+//   if (req.session.user_id) {
+//     next();
+//   } else {
+//     res.redirect('/login');s
+//   }
+// };
+
+// app.use('/', authorize);
 
 //// GET Route Handlers ----------------------\\\\
 
@@ -80,29 +88,29 @@ app.get("/users.json", (req, res) => {
 //// Routing/Handling for the index
 app.get("/urls", (req, res) => {
   // Get the user id from the cookie
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
 
-  // Assing user from user DB
-  const user = users[userID];
-
+  
   // Redirect users that aren't logged in
   if (!userID) {
     return res.redirect("/login");
   }
+  // Assing user from user DB
+  const user = users[userID];
 
   // Filter the urlDatabase by the userID
   let userURLs = filterURLs(urlDatabase, userID);
 
   // Consolidate data for template
   const templateVars = { user , urls: userURLs };
-
+ 
   res.render("urls_index", templateVars);
 });
 
 //// Routing/Handling for creating shortURLs
 app.get("/urls/new", (req, res) => {
   // Get the user id from the cookie
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
 
   // If no userID, redirect to login
   if (!userID) {
@@ -124,7 +132,7 @@ app.get("/urls/new", (req, res) => {
 //// Routing/Handling for shortURLs
 app.get("/urls/:shortURL", (req, res) => {
   // Get the user id from the cookie
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
 
   // Assing user from user DB
   const user = users[userID];
@@ -154,7 +162,7 @@ app.get("/u/:shortURL", (req, res) => {
 //// Routing/Handling for user Registration
 app.get("/register", (req, res) => {
   // Get the user id from the cookie
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
 
   // Assing user from user DB
   const user = users[userID];
@@ -168,7 +176,7 @@ app.get("/register", (req, res) => {
 //// Routing/Handling for user login
 app.get("/login", (req, res) => {
   // Get the user id from the cookie
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
 
   // Assing user from user DB
   const user = users[userID];
@@ -188,7 +196,7 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
 
   // Get the user id from the cookie
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   
   // Assing user from user DB
   let longURL = req.body.longURL;
@@ -213,16 +221,13 @@ app.post("/login", (req, res) => {
   if (loginEmail === "" || loginPass === "") {
     return res.status(403).send('Email/Pass are empty');
   }
-
-  // Password hash checks
-  // const user = users[userID]
-  // const hashedPassword = users[user]['password']
   
   // Check to see if the user already exists
   if (loginEmail && loginPass) {
     for (let user in users) {
       if (loginEmail === users[user]['email'] && bcrypt.compareSync(loginPass, users[user]['password'])) {
-        return res.cookie('user_id', user).redirect("/urls");
+        req.session.user_id = users[user]['userID']
+        return redirect("/urls");
       }
       if (loginEmail === users[user]['email'] && loginPass !== users[user]['password']) {
         return res.sendStatus(403);
@@ -237,14 +242,14 @@ app.post("/login", (req, res) => {
 // Clearing Cookies
 app.post("/logout", (req, res) => {
 
-  res.clearCookie('user_id');
+  req.session = null;
 
   res.redirect("urls/");
 });
 
 // Registration
 app.post("/register", (req, res) => {
-// Add a new user to the global users object
+// Add a new user to the global users database
 
   // Registration Logic
   // Check Email/Password were provided
@@ -281,7 +286,8 @@ app.post("/register", (req, res) => {
   users[userID] = user;
   
   // Give them a cookie
-  res.cookie('user_id', userID);
+  req.session.user_id = userID
+  // res.cookie('user_id', userID); //depreciated
 
   // Send them to the index
   res.redirect("/urls");
@@ -294,7 +300,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL;
 
   // Import cookie/user_id
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   
   // Only a user can delete their URLs
   if (userID && urlDatabase[shortURL].userID === userID) {
@@ -312,7 +318,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   let longURL = req.body.longURL;
   
   // Import cookie/user_id
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   
   // Only a user can edit their URLS
   if (userID && urlDatabase[shortURL].userID === userID) {

@@ -20,7 +20,7 @@
                     <% } else { %>
                       <form action="/logout" method="POST">
                           <label for="user"> Logged in as: <%= user.email %>  </label>
-                          <button type="submit" name= <%= user %> class="btn btn-primary">log out</button></form>
+                          <button type="submit" name= <%= user.id %> class="btn btn-primary">log out</button></form>
               <% } %>
   </nav>
 </header>
