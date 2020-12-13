@@ -2,6 +2,8 @@
 
 TinyApp is a full stack web application built with Node, Express and Bootstrap that allows users to shorten long URLs
 
+## Final Product
+
 !["User Account Login"](https://github.com/ar4sdoteth/tinyapp/blob/master/images/TinyApp_Login.png?raw=true)
 
 !["Creating a Short URL"](https://github.com/ar4sdoteth/tinyapp/blob/master/images/TinyApp_NewURL.png?raw=true)
@@ -17,7 +19,7 @@ TinyApp is a full stack web application built with Node, Express and Bootstrap t
   - bcrypt
   - body-parser
   - cookie-session
-  </ul>
+
 
 ## Getting Started
   - Install all dependencies using `npm install`
