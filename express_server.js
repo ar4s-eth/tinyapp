@@ -128,6 +128,10 @@ app.get("/login", (req, res) => {
   // Get the user id from the cookie
   const userID = req.session.user_id;
 
+  if (userID) {
+    return res.redirect("/urls");
+  }
+
   // Assing user from user DB
   const user = users[userID];
   
