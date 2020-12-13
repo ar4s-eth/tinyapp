@@ -13,9 +13,9 @@ const PORT = 8080;
 const { generateRandomString, filterURLs, getUserByEmail, urlDatabase, users} = require("./helpers");
 
 // Middleware && Modules
-const bodyParser = require('body-parser'); 
+const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 
 // Setup
 app.set("view engine", "ejs"); // Setting ejs to be the view engine
@@ -182,13 +182,12 @@ app.post("/login", (req, res) => {
   }
   
   // Check to see if the user already exists
-  const foundUser = getUserByEmail(providedEmail, users)
-  console.log(`foundUser`, foundUser)
-  console.log(`database foundUser`, users['148c66'])
+  const foundUser = getUserByEmail(providedEmail, users);
+
   //Check if the user and password match
   if (providedEmail && providedPass) {
     if (foundUser && bcrypt.compareSync(providedPass, users[foundUser]['password'])) {
-      req.session.user_id = foundUser
+      req.session.user_id = foundUser;
       return res.redirect("/urls");
     }
     return res.sendStatus(403).send("Incorrect username or password");
@@ -215,13 +214,13 @@ app.post("/register", (req, res) => {
   }
   // Check to see if the user already exists
   let providedEmail = req.body.email;
-  const foundUser = getUserByEmail(providedEmail, users)
+  const foundUser = getUserByEmail(providedEmail, users);
 
   if (providedEmail && req.body.password) {
-      if (foundUser) {
-        return res.sendStatus(400);
-      }
+    if (foundUser) {
+      return res.sendStatus(400);
     }
+  }
 
   // Generate the userID,
   // fetch email/password from form
@@ -243,7 +242,7 @@ app.post("/register", (req, res) => {
   users[userID] = user;
   
   // Give them a cookie
-  req.session.user_id = userID
+  req.session.user_id = userID;
 
   // Send them to the index
   res.redirect("/urls");

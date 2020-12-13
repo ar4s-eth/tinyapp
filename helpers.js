@@ -10,7 +10,7 @@ const urlDatabase = {
 const users = {
   '148c66': {
     userID: "148c66",
-    email: "ashley.barr@ar4s.com",
+    email: "ashley.barr@meow.com",
     password: "$2b$10$QnEamVFEEIAiM.k.9Umbn.h3rTAWtur20JtN7TOxKxdVNIlmbwl8a"
   }
 };
@@ -44,17 +44,6 @@ const getUserByEmail = (email, database) => {
   return undefined;
 }
 
-
-// Cookie Authorization
-// const authorize = (req, res, next) => {
-//   if (req.session.user_id) {
-//     next();
-//   } else {
-//     res.redirect('/login');s
-//   }
-// };
-
-// app.use('/', authorize);
 
 module.exports = {
   generateRandomString,
