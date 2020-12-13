@@ -1,9 +1,3 @@
-/*
-Initial
-  Setup
-    Modules && Dependencies
-*/
-//------------------------------\\
 // Server Initialization
 const express = require('express');
 const app = express();
@@ -28,11 +22,8 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-//--------------------------------------------------\\
 
-
-
-//// GET Route Handlers ----------------------\\\\
+//// GET Route Handlers 
 
 //// Handler prints urlDatabase as a JSON object
 app.get("/urls.json", (req, res) => {
@@ -147,7 +138,7 @@ app.get("/login", (req, res) => {
 });
 
 
-// POST Route Handlers -----------------------------\\
+// POST Route Handlers 
 
 // shortURL creation/longURL association
 app.post("/urls", (req, res) => {
@@ -176,21 +167,26 @@ app.post("/login", (req, res) => {
   let providedEmail = req.body.email;
   let providedPass = req.body.password;
 
-  // Check to make sure that both Email/Password were provided
+  //1. Check to make sure that both Email/Password were provided
   if (providedEmail === "" || providedPass === "") {
     return res.status(403).send('Email & Password are empty');
-  }
-  
-  // Check to see if the user already exists
-  const foundUser = getUserByEmail(providedEmail, users);
-
-  //Check if the user and password match
-  if (providedEmail && providedPass) {
-    if (foundUser && bcrypt.compareSync(providedPass, users[foundUser]['password'])) {
-      req.session.user_id = foundUser;
-      return res.redirect("/urls");
+  } else {
+    //2 the username and password were provided
+    // Check to see if the user already exists, if the username and password were provided
+    const foundUser = getUserByEmail(providedEmail, users);
+    //3. if the user was found
+    if(foundUser){
+      //then check for the password:
+      if (bcrypt.compareSync(providedPass, users[foundUser]['password'])) {
+        req.session.user_id = foundUser;
+        return res.redirect("/urls");
+      } else {
+        res.send("Incorrect username or password");
+      }
+      
+    } else {
+      res.send("Incorrect username or password");
     }
-    return res.sendStatus(403).send("Incorrect username or password");
   }
 });
 
