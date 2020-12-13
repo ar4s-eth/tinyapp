@@ -9,9 +9,11 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 
+// Helper functions && Databases
+const { generateRandomString, filterURLs, getUserByEmail, urlDatabase, users} = require("./helpers");
+
 // Middleware && Modules
 const bodyParser = require('body-parser'); 
-const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
 
@@ -29,49 +31,6 @@ app.use(cookieSession({
 //--------------------------------------------------\\
 
 
-// Database Objects
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "148c66" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "148c66" }
-};
-
-const users = {
-  '148c66': {
-    userID: "148c66",
-    email: "ashley.barr@ar4s.com",
-    password: "$2b$10$79TYXaWXeHygAJaq/ah2Iu1TKlwMgaqL3RZdHFkfc4aop5Wkth2zG"
-  }
-};
-
-// ---- Helper Functions ---- \\
-
-// Function returns a random string
-// of 6 characters a-Z, 0-9
-const generateRandomString = () => {
-  return crypto.randomBytes(3).toString('hex');
-};
-
-// Filter DB entries by User ID
-const filterURLs = (database, user) => {
-  const filteredDB = {};
-  for (let url in database) {
-    if (database[url].userID === user) {
-      filteredDB[url] = database[url];
-    }
-  }
-  return filteredDB;
-};
-
-// Cookie Authorization
-// const authorize = (req, res, next) => {
-//   if (req.session.user_id) {
-//     next();
-//   } else {
-//     res.redirect('/login');s
-//   }
-// };
-
-// app.use('/', authorize);
 
 //// GET Route Handlers ----------------------\\\\
 
@@ -214,28 +173,26 @@ app.post("/urls", (req, res) => {
 app.post("/login", (req, res) => {
 
   // Grab credentials from form
-  let loginEmail = req.body.email;
-  let loginPass = req.body.password;
+  let providedEmail = req.body.email;
+  let providedPass = req.body.password;
 
   // Check to make sure that both Email/Password were provided
-  if (loginEmail === "" || loginPass === "") {
-    return res.status(403).send('Email/Pass are empty');
+  if (providedEmail === "" || providedPass === "") {
+    return res.status(403).send('Email & Password are empty');
   }
   
   // Check to see if the user already exists
-  if (loginEmail && loginPass) {
-    for (let user in users) {
-      if (loginEmail === users[user]['email'] && bcrypt.compareSync(loginPass, users[user]['password'])) {
-        req.session.user_id = users[user]['userID']
-        return redirect("/urls");
-      }
-      if (loginEmail === users[user]['email'] && loginPass !== users[user]['password']) {
-        return res.sendStatus(403);
-      }
+  const foundUser = getUserByEmail(providedEmail, users)
+  console.log(`foundUser`, foundUser)
+  console.log(`database foundUser`, users['148c66'])
+  //Check if the user and password match
+  if (providedEmail && providedPass) {
+    if (foundUser && bcrypt.compareSync(providedPass, users[foundUser]['password'])) {
+      req.session.user_id = foundUser
+      return res.redirect("/urls");
     }
-    return res.sendStatus(403);
+    return res.sendStatus(403).send("Incorrect username or password");
   }
-  console.log(`hashedPassword`, hashedPassword)
 });
 
 
@@ -257,14 +214,14 @@ app.post("/register", (req, res) => {
     return res.sendStatus(400);
   }
   // Check to see if the user already exists
-  let regEmail = req.body.email;
-  if (req.body.email && req.body.password) {
-    for (let user in users) {
-      if (regEmail === users[user]['email']) {
+  let providedEmail = req.body.email;
+  const foundUser = getUserByEmail(providedEmail, users)
+
+  if (providedEmail && req.body.password) {
+      if (foundUser) {
         return res.sendStatus(400);
       }
     }
-  }
 
   // Generate the userID,
   // fetch email/password from form
@@ -287,7 +244,6 @@ app.post("/register", (req, res) => {
   
   // Give them a cookie
   req.session.user_id = userID
-  // res.cookie('user_id', userID); //depreciated
 
   // Send them to the index
   res.redirect("/urls");
