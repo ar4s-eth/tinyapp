@@ -45,6 +45,7 @@ app.get("/urls", (req, res) => {
   if (!userID) {
     return res.redirect("/login");
   }
+
   // Assing user from user DB
   const user = users[userID];
 
@@ -83,6 +84,11 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   // Get the user id from the cookie
   const userID = req.session.user_id;
+
+  // Redirect users that aren't logged in
+  if (!userID) {
+    return res.redirect("/login");
+  }
 
   // Assing user from user DB
   const user = users[userID];
