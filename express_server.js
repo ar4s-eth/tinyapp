@@ -85,11 +85,22 @@ app.get("/urls/:shortURL", (req, res) => {
   // Get the user id from the cookie
   const userID = req.session.user_id;
 
+  // Grab && assign the shortURL && longURL
+  const shortURL = req.params.shortURL;
+  const obj = urlDatabase[shortURL];
+
+  
+
   // Throw and error if the shortURL is invalid
   if (!urlDatabase[req.params.shortURL]) {
     return res.sendStatus(403)
   }
-
+  // Throw an error if the userID doesn't match
+  // the shortURL creator's ID
+  if (urlDatabase[shortURL].userID !== userID) {
+    return res.sendStatus(403)
+  }
+  
 
   // Redirect users that aren't logged in
   if (!userID) {
